@@ -8,7 +8,7 @@ public class FibonacciHeap
 {
 	public HeapNode min;
 	public int total_nodes;
-	public int[] roots_list;
+	public HeapNode[] roots_list;
 
 	/**
 	 * 
