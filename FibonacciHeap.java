@@ -7,8 +7,10 @@
 public class FibonacciHeap
 {
 	public HeapNode min;
-	public int total_nodes;
-	public HeapNode[] roots_list;
+	public int total_nodes = 0;
+	public int numOfRoots;
+	private int totalCutsCnt = 0;
+	private int totalLinksCnt = 0;
 
 	/**
 	 * 
@@ -19,7 +21,10 @@ public class FibonacciHeap
 	 */
 	public HeapNode insert(int key, String info) 
 	{    
-		return null; // should be replaced by student code
+		HeapNode x = new HeapNode(key, info);
+		addToRoots(x);
+		total_nodes++;
+		return x;
 	}
 
 	/**
@@ -29,7 +34,7 @@ public class FibonacciHeap
 	 */
 	public HeapNode findMin()
 	{
-		return null; // should be replaced by student code
+		return min;
 	}
 
 	/**
@@ -39,9 +44,50 @@ public class FibonacciHeap
 	 */
 	public void deleteMin()
 	{
-		return; // should be replaced by student code
+		total_nodes--;
+		if (minChild != null) {
+			totalCutsCnt++;
+			HeapNode next = minChild;
+			do {
+				HeapNode temp = next;
+				next = next.next;
+				temp.prev = null;
+				addToRoots(temp);
+			} while (next != child);
+		}
+
+		if (min.next == min) {
+			this.min = null;
+			return;
+		}
+
+		if (min.prev != null) {
+			min.prev.next = min.next;
+		}
+		if (min.next != null) {
+			min.next.prev = min.prev;
+		}
+
+		HeapNode newMin = updateMin(min);
+		setMin(newMin);
 
 	}
+
+	private HeapNode updateMin(HeapNode min){
+		HeapNode newMin = min;
+    	float minVal = Float.POSITIVE_INFINITY;
+    	HeapNode next = min.next;
+    
+		do {
+			if (next.key < minVal) {
+				minVal = next.key;
+				newMin = next;
+			}
+			next = next.next;
+		} while (next != min);
+		return newMin;
+	}
+
 
 	/**
 	 * 
@@ -52,7 +98,54 @@ public class FibonacciHeap
 	 */
 	public void decreaseKey(HeapNode x, int diff) 
 	{    
-		return; // should be replaced by student code
+		x.key = x.key - diff;
+		if (x.parent != null){
+			if (x.key < x.parent.key){
+				detachNode(x, false);
+			}
+		}
+
+		else {
+			if(x.key < this.min.key) {
+				setMin(x);
+			}
+		}
+	}
+
+	private void detachNode(HeapNode x, boolean isDelete)
+	{
+		totalCutsCnt++;
+		HeapNode parent = x.parent;
+		if (x.prev != null) {
+			x.prev.next = x.next;
+		}
+		if (x.next != null) {
+			x.next.prev = x.prev;
+		}
+		x.parent = null;
+		if (!isDelete) addToRoots(x);
+		if (parent != null) {
+			parent.child = null;
+			if (parent.mark && parent.parent != null) detachNode(parent, false);
+			else if (parent.parent != null) parent.mark = true;
+		}
+	}
+		
+
+	private void addToRoots(HeapNode x)
+	{
+		numOfRoots++;
+		HeapNode next = this.min.next;
+		this.min.next = x;
+		x.next = next;
+		x.prev = this.min;
+		next.prev = x;
+		if (x.key < this.min.key) setMin(x);
+	}
+
+	private void setMin(HeapNode x)
+	{
+		this.min = x;
 	}
 
 	/**
@@ -62,7 +155,8 @@ public class FibonacciHeap
 	 */
 	public void delete(HeapNode x) 
 	{    
-		return; // should be replaced by student code
+		decreaseKey(x, Float.POSITIVE_INFINITY);
+		deleteMin();
 	}
 
 
@@ -73,7 +167,7 @@ public class FibonacciHeap
 	 */
 	public int totalLinks()
 	{
-		return 0; // should be replaced by student code
+		return totalLinksCnt;
 	}
 
 
@@ -84,7 +178,7 @@ public class FibonacciHeap
 	 */
 	public int totalCuts()
 	{
-		return 0; // should be replaced by student code
+		return totalCutsCnt;
 	}
 
 
@@ -132,5 +226,11 @@ public class FibonacciHeap
 		public HeapNode parent;
 		public int rank;
 		public boolean mark;
+
+		public HeapNode(int key, String info){
+				this.key = key;
+				this.info = info;
+				this.mark = false;
+		}
 	}
 }
