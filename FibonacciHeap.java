@@ -208,15 +208,10 @@ public class FibonacciHeap
 		
 		// both heaps aren't empty, connect the rootLists
 		} else {
-			HeapNode firstNode1 = this.min;
-			HeapNode lastNode1 = getLastRoot(firstNode1, this);
-			HeapNode firstNode2 = heap2.min;
-			connectNodes(lastNode1, firstNode2);
+			HeapNode temp = this.min.next;
+			connectNodes(this.min, heap2.min.next);
+			connectNodes(heap2.min, temp);
 
-			HeapNode lastNode2 = heap2.min;
-			lastNode2 = getLastRoot(lastNode2, heap2);
-			connectNodes(lastNode2, this.min);
-		
 			// update the relevant fields
 			if (heap2.min.key < this.min.key){
 				this.setMin(heap2.min);
@@ -227,26 +222,23 @@ public class FibonacciHeap
 		}
 		
 		// destroy heap2 so it won't be useable afterwards
-		heap2.min = null;
-		heap2.total_nodes = 0;
-		heap2.numOfRoots = 0;
-		heap2.totalCutsCnt = 0;
-		heap2.totalLinksCnt = 0;
-		heap2.rootList = null;
+		heap2.clear();
 		return;    		
 		
 	}
-
-	private HeapNode getLastRoot(HeapNode currRoot, FibonacciHeap heap){
-		while (currRoot.next!=heap.min) { 
-			currRoot = currRoot.next;
-		}
-		return currRoot;
-	}
-
+	
 	private void connectNodes(HeapNode node1, HeapNode node2){
 		node1.next = node2;
 		node2.prev = node1;
+	}
+
+	private void clear() {
+		this.min = null;
+		this.total_nodes = 0;
+		this.numOfRoots = 0;
+		this.totalCutsCnt = 0;
+		this.totalLinksCnt = 0;
+		this.rootList = null;
 	}
 
 	/**
