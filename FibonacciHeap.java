@@ -1,3 +1,6 @@
+
+import com.sun.source.doctree.SerialFieldTree;
+
 /**
  * FibonacciHeap
  *
@@ -11,6 +14,8 @@ public class FibonacciHeap
 	public int numOfRoots;
 	private int totalCutsCnt = 0;
 	private int totalLinksCnt = 0;
+	public HeapNode[] rootList;
+
 
 	/**
 	 * 
@@ -189,7 +194,59 @@ public class FibonacciHeap
 	 */
 	public void meld(FibonacciHeap heap2)
 	{
-		return; // should be replaced by student code   		
+		// if heap2 is clear, no changed needed
+		if (heap2 == null || heap2.min == null){
+			return;
+		}
+
+		// if this heap is empty, copy heap2 into it , later destroy heap2
+		if (this.min == null){
+			this.min = heap2.min;
+			this.total_nodes = heap2.total_nodes;
+			this.numOfRoots = heap2.numOfRoots;	
+			this.rootList = heap2.rootList;	
+		
+		// both heaps aren't empty, connect the rootLists
+		} else {
+			HeapNode firstNode1 = this.min;
+			HeapNode lastNode1 = getLastRoot(firstNode1, this);
+			HeapNode firstNode2 = heap2.min;
+			connectNodes(lastNode1, firstNode2);
+
+			HeapNode lastNode2 = heap2.min;
+			lastNode2 = getLastRoot(lastNode2, heap2);
+			connectNodes(lastNode2, this.min);
+		
+			// update the relevant fields
+			if (heap2.min.key < this.min.key){
+				this.setMin(heap2.min);
+			}
+
+			this.total_nodes += heap2.total_nodes;
+			this.numOfRoots += heap2.numOfRoots;
+		}
+		
+		// destroy heap2 so it won't be useable afterwards
+		heap2.min = null;
+		heap2.total_nodes = 0;
+		heap2.numOfRoots = 0;
+		heap2.totalCutsCnt = 0;
+		heap2.totalLinksCnt = 0;
+		heap2.rootList = null;
+		return;    		
+		
+	}
+
+	private HeapNode getLastRoot(HeapNode currRoot, FibonacciHeap heap){
+		while (currRoot.next!=heap.min) { 
+			currRoot = currRoot.next;
+		}
+		return currRoot;
+	}
+
+	private void connectNodes(HeapNode node1, HeapNode node2){
+		node1.next = node2;
+		node2.prev = node1;
 	}
 
 	/**
@@ -199,7 +256,7 @@ public class FibonacciHeap
 	 */
 	public int size()
 	{
-		return 42; // should be replaced by student code
+		return total_nodes;
 	}
 
 
@@ -210,7 +267,7 @@ public class FibonacciHeap
 	 */
 	public int numTrees()
 	{
-		return 0; // should be replaced by student code
+		return numOfRoots;
 	}
 
 	/**
