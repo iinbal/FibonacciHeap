@@ -14,7 +14,6 @@ public class FibonacciHeap
 	public int numOfRoots;
 	private int totalCutsCnt = 0;
 	private int totalLinksCnt = 0;
-	public HeapNode[] rootList;
 
 
 	/**
@@ -203,8 +202,7 @@ public class FibonacciHeap
 		if (this.min == null){
 			this.min = heap2.min;
 			this.total_nodes = heap2.total_nodes;
-			this.numOfRoots = heap2.numOfRoots;	
-			this.rootList = heap2.rootList;	
+			this.numOfRoots = heap2.numOfRoots;
 		
 		// both heaps aren't empty, connect the rootLists
 		} else {
@@ -238,7 +236,6 @@ public class FibonacciHeap
 		this.numOfRoots = 0;
 		this.totalCutsCnt = 0;
 		this.totalLinksCnt = 0;
-		this.rootList = null;
 	}
 
 	/**
