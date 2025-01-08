@@ -287,7 +287,7 @@ public class FibonacciHeap
 		
 		// both heaps aren't empty, connect the rootLists
 		} else {
-			HeapNode temp = minNode.next;
+			// HeapNode temp = minNode.next;
 			addToRoots(heap2.minNode);
 
 			// update the relevant fields
