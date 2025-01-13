@@ -1,12 +1,5 @@
 package src;
 
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import com.sun.source.doctree.SerialFieldTree;
-
 /**
  * FibonacciHeap
  *
@@ -20,6 +13,49 @@ public class FibonacciHeap
 	public int numOfRoots = 0;
 	private int totalCutsCnt = 0;
 	private int totalLinksCnt = 0;
+
+	/**
+ * Print the Fibonacci heap in a hierarchical format.
+ */
+public void printHeap() {
+    if (minNode == null) {
+        System.out.println("The heap is empty.");
+        return;
+    }
+
+    System.out.println("Fibonacci Heap:");
+    HeapNode current = minNode;
+    do {
+        printSubTree(current, 0); // Print each tree starting from the root
+        current = current.next;
+    } while (current != minNode);
+}
+
+/**
+ * Helper method to print a subtree rooted at a specific node.
+ *
+ * @param node  The current node to print.
+ * @param depth The depth of the current node (used for indentation).
+ */
+private void printSubTree(HeapNode node, int depth) {
+    if (node == null) {
+        return;
+    }
+
+    // Indent the node based on its depth
+    System.out.println("  ".repeat(depth) + "Key: " + node.key + " (Rank: " + node.rank + ")");
+
+    // Recursively print the children of the current node
+    HeapNode child = node.child;
+    if (child != null) {
+        HeapNode currentChild = child;
+        do {
+            printSubTree(currentChild, depth + 1); // Increase indentation for children
+            currentChild = currentChild.next;
+        } while (currentChild != child);
+    }
+}
+
 
 	// set min and increase numOfRoots in case it's not null
 	public FibonacciHeap(HeapNode min){
@@ -84,12 +120,21 @@ public class FibonacciHeap
 				HeapNode newMin = searchMin(minNode.child); //search the min key among the minNode's childrens
 				minNode.child.parent = null; //detach connection between minNode and his child
 				FibonacciHeap newHeap = new FibonacciHeap(newMin); // create new heap from minNode's children
-				HeapNode nodeToDelete = minNode;
-				minNode = searchMin(nodeToDelete); //search new min in the original heap
-				removeNodeFromRootList(nodeToDelete); 
+				removeMin();
 				meld(newHeap); // meld the original heap with minNode's childrens heap
 			}
+			else removeMin();
+			consolidate();
 		}
+		
+	}
+
+	private void removeMin()
+	{
+		HeapNode nodeToDelete = minNode;
+		HeapNode newMin = searchMin(nodeToDelete); //search new min in the original heap
+		removeNodeFromRootList(nodeToDelete);
+		setMin(newMin);
 	}
 
 	//remove node by changing pointers
@@ -103,8 +148,8 @@ public class FibonacciHeap
 	//search min key among the node and his brothers
 	public HeapNode searchMin(HeapNode node)
 	{
-    	int minVal = node.key; 
-    	HeapNode next = node.next;
+		HeapNode next = node.next;
+    	int minVal = next.key; 
 		HeapNode newMin = node;
 		// search the lowest key among all brothers
 		do {
@@ -123,12 +168,14 @@ public class FibonacciHeap
 		rootList[0] = minNode; 
 		if (numOfRoots > 1) {
 			HeapNode node = minNode.next;
-		for (i=1 ; i<rootList.length ; i++){
-			rootList[i] = node;
-			node = node.next;
-			}
+			for (int i=1 ; i<rootList.length ; i++){
+				rootList[i] = node;
+				System.out.println("rootList in index " + i + "is " + node.key);
+				node = node.next;
+				}
 		}
 		//create an array of degrees according to the maxDegree, all set to null
+		int n = total_nodes;
 		int maxDegree = (int) Math.floor(Math.log(n) / Math.log(2.0));
 		HeapNode[] degreeArray = new HeapNode[maxDegree + 1];
 		degreeArray[minNode.rank] = minNode; // place minNode in the correct index according to it's degree
@@ -139,35 +186,57 @@ public class FibonacciHeap
 			// if there is a root with the same rank, link them
 			if (degreeArray[currDegree] != null){
 				HeapNode nodeToLink = degreeArray[currDegree];
-				HeapNode newRoot =  link(nodeToLink, currentNode);
+				HeapNode newParent;
+        		HeapNode newChild;
+				if (nodeToLink.key < currentNode.key) {
+					newParent = nodeToLink;
+					newChild = currentNode;
+				}
+				else {
+					newParent = currentNode;
+					newChild = nodeToLink;
+				}
+				HeapNode newRoot = link(newParent, newChild);
 				degreeArray[currDegree] = null; // set the rank index to null
 				currDegree++; 
 				degreeArray[currDegree] = newRoot; // place the new root in the right index				 
 			} 
 			// if the degreeArray is empty at this currentNode's rank, place the currentNode there
 			else degreeArray[currDegree] = currentNode; // 
-			currentNode = rootList[++i]; // continue to next root
+			i++;
+			if (i < numOfRoots) currentNode = rootList[++i]; // continue to next root
+			else break;
 		} while (currentNode != minNode);
 
 		
 	}
-	//link two roots
-	private HeapNode link(HeapNode node1, HeapNode node2){
-		//set the one with the larger key as parent, and the one with the smaller key as child
-		if (node1.key < node2.key){
-			HeapNode parent = node1;
-			HeapNode child = node2;
+
+	public HeapNode link(HeapNode smaller, HeapNode larger){
+		// Remove the larger node from the root list
+		removeNodeFromRootList(larger);
+
+		// Make the larger node a child of the smaller node
+		larger.parent = smaller;
+
+		// If the smaller node has no children, set the larger node as its child
+		if (smaller.child == null) {
+			smaller.child = larger;
+			larger.next = larger;
+			larger.prev = larger;
+		} else { // Add the larger node to the child list of the smaller node
+			HeapNode child = smaller.child;
+			larger.next = child;
+			larger.prev = child.prev;
+			child.prev.next = larger;
+			child.prev = larger;
 		}
-		else {
-			HeapNode parent = node2;
-			HeapNode child = node1;
-		}
-		//make  the one with the smaller key as child of the one with the larger key
-		parent.child = child;
-		child.parent = parent;
-		removeNodeFromRootList(child); // remove the child from the rootList
-		parent.rank++; // increase parent rank
-		return parent;
+
+		// Increase the rank of the smaller node
+		smaller.rank++;
+
+		// Return the smaller node as the root of the resulting tree
+		totalLinksCnt++;
+		return smaller;
 	}
 
 	/**
@@ -207,7 +276,8 @@ public class FibonacciHeap
 		addToRoots(node);
 		if (parent != null) {
 			parent.child = null;
-			if (parent.mark && parent.parent != null) detachNode(parent, false);
+			parent.rank--;
+			if (parent.mark && parent.parent != null) detachNode(parent);
 			else if (parent.parent != null) parent.mark = true;
 		}
 		if (node.key < minNode.key) setMin(node);
@@ -237,8 +307,10 @@ public class FibonacciHeap
 	 */
 	public void delete(HeapNode node) 
 	{   
-		int negativeInfinity = Integer.MIN_VALUE;
-		decreaseKey(node, negativeInfinity);
+		int Infinity = Integer.MAX_VALUE;
+		decreaseKey(node, Infinity);
+		System.out.println("after deacrese key:");
+		printHeap();
 		deleteMin();
 	}
 
@@ -287,9 +359,13 @@ public class FibonacciHeap
 		
 		// both heaps aren't empty, connect the rootLists
 		} else {
-			// HeapNode temp = minNode.next;
-			addToRoots(heap2.minNode);
-
+			HeapNode thisNext = minNode.next;
+			HeapNode heap2Prev = heap2.minNode.prev;
+			minNode.next = heap2.minNode;
+			heap2.minNode.prev = minNode;
+			thisNext.prev = heap2Prev;
+			heap2Prev.next = thisNext;
+			
 			// update the relevant fields
 			if (heap2.minNode.key < this.minNode.key) setMin(heap2.minNode);
 

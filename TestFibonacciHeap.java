@@ -1,4 +1,5 @@
-package src;
+package FibonacciHeap;
+
 
 public class TestFibonacciHeap {
     public static void main(String[] args) {
