@@ -13,6 +13,7 @@ public class FibonacciHeap
 	public int numOfRoots = 0;
 	private int totalCutsCnt = 0;
 	private int totalLinksCnt = 0;
+	public final int Infinity = Integer.MAX_VALUE;
 
 	/**
  * Print the Fibonacci heap in a hierarchical format.
@@ -112,21 +113,27 @@ private void printSubTree(HeapNode node, int depth) {
 	 */
 	public void deleteMin()
 	{
-		total_nodes--;
 		// if the heap is not empty
 		if (minNode != null){
 			// if ths minNode has child
 			if (minNode.child != null) {
+				System.out.println("searching min");
 				HeapNode newMin = searchMin(minNode.child); //search the min key among the minNode's childrens
+				System.out.println("newMin key is " + newMin.key);
 				minNode.child.parent = null; //detach connection between minNode and his child
+				totalCutsCnt++;
 				FibonacciHeap newHeap = new FibonacciHeap(newMin); // create new heap from minNode's children
 				removeMin();
 				meld(newHeap); // meld the original heap with minNode's childrens heap
 			}
 			else removeMin();
+			System.out.println("\nprinting heap from delete before conso");
+			printHeap();
 			consolidate();
+			total_nodes--;		
+			System.out.println("\nprinting heap from delete after conso");
+			printHeap();
 		}
-		
 	}
 
 	private void removeMin()
@@ -140,14 +147,22 @@ private void printSubTree(HeapNode node, int depth) {
 	//remove node by changing pointers
 	public void removeNodeFromRootList(HeapNode node) 
 	{
-        node.prev.next = node.next;
+        if (node == null) return;
+		if (node.next == node){
+			numOfRoots--;
+			return;
+		}
+		node.prev.next = node.next;
         node.next.prev = node.prev;
+		node.next = node.prev = null;
 		numOfRoots--;
     }
 
 	//search min key among the node and his brothers
 	public HeapNode searchMin(HeapNode node)
 	{
+		if (node == null ) return null;
+		if (node.next == null && node != minNode) return node;
 		HeapNode next = node.next;
     	int minVal = next.key; 
 		HeapNode newMin = node;
@@ -159,6 +174,7 @@ private void printSubTree(HeapNode node, int depth) {
 			}
 			next = next.next;
 		} while (next != node);
+		if (node != minNode && node.key < newMin.key) newMin = node; // if we are serachong among che children of the minNode, the one we have sent is also
 		return newMin;
 	}
 
@@ -168,7 +184,7 @@ private void printSubTree(HeapNode node, int depth) {
 		rootList[0] = minNode; 
 		if (numOfRoots > 1) {
 			HeapNode node = minNode.next;
-			for (int i=1 ; i<rootList.length ; i++){
+			for (int i=0 ; i<rootList.length ; i++){
 				rootList[i] = node;
 				System.out.println("rootList in index " + i + "is " + node.key);
 				node = node.next;
@@ -176,15 +192,16 @@ private void printSubTree(HeapNode node, int depth) {
 		}
 		//create an array of degrees according to the maxDegree, all set to null
 		int n = total_nodes;
-		int maxDegree = (int) Math.floor(Math.log(n) / Math.log(2.0));
-		HeapNode[] degreeArray = new HeapNode[maxDegree + 1];
-		degreeArray[minNode.rank] = minNode; // place minNode in the correct index according to it's degree
-		int i = 1; //starting from second root in the list
-		HeapNode currentNode = rootList[i];
-		do {
+		int maxDegree = (int) Math.floor(Math.log(n) / Math.log(2.0)) + 1;
+		HeapNode[] degreeArray = new HeapNode[maxDegree];
+		//?????? degreeArray[minNode.rank] = minNode; // place minNode in the correct index according to it's degree
+		
+		//int i = 1; //starting from second root in the list
+		//HeapNode currentNode = rootList[i];
+		for (HeapNode currentNode : rootList){
 			int currDegree = currentNode.rank;
+			while (degreeArray[currDegree] != null){
 			// if there is a root with the same rank, link them
-			if (degreeArray[currDegree] != null){
 				HeapNode nodeToLink = degreeArray[currDegree];
 				HeapNode newParent;
         		HeapNode newChild;
@@ -196,19 +213,12 @@ private void printSubTree(HeapNode node, int depth) {
 					newParent = currentNode;
 					newChild = nodeToLink;
 				}
-				HeapNode newRoot = link(newParent, newChild);
+				currentNode = link(newParent, newChild); // updates the linkcnt and updates currentNode to be the new root of the new tree 
 				degreeArray[currDegree] = null; // set the rank index to null
-				currDegree++; 
-				degreeArray[currDegree] = newRoot; // place the new root in the right index				 
+				currDegree++; // continue to cheack if needed more linking		 
 			} 
-			// if the degreeArray is empty at this currentNode's rank, place the currentNode there
-			else degreeArray[currDegree] = currentNode; // 
-			i++;
-			if (i < numOfRoots) currentNode = rootList[++i]; // continue to next root
-			else break;
-		} while (currentNode != minNode);
-
-		
+			degreeArray[currDegree] = currentNode; // place the new root in the right index after finished linking 	
+		}
 	}
 
 	public HeapNode link(HeapNode smaller, HeapNode larger){
@@ -233,9 +243,9 @@ private void printSubTree(HeapNode node, int depth) {
 
 		// Increase the rank of the smaller node
 		smaller.rank++;
+		totalLinksCnt++;
 
 		// Return the smaller node as the root of the resulting tree
-		totalLinksCnt++;
 		return smaller;
 	}
 
@@ -265,15 +275,14 @@ private void printSubTree(HeapNode node, int depth) {
 	private void detachNode(HeapNode node)
 	{
 		totalCutsCnt++;
-		HeapNode parent = node.parent;
-		if (node.prev != null) {
+		if (node.next != node) {
+			node.next.prev = node.prev;
 			node.prev.next = node.next;
 		}
-		if (node.next != null) {
-			node.next.prev = node.prev;
-		}
+		HeapNode parent = node.parent;
 		node.parent = null;
 		addToRoots(node);
+		
 		if (parent != null) {
 			parent.child = null;
 			parent.rank--;
@@ -291,6 +300,7 @@ private void printSubTree(HeapNode node, int depth) {
         node.next = minNode.next;
         minNode.next.prev = node;
         minNode.next = node;
+		node.mark = false;
 		
 	}
 
@@ -307,8 +317,8 @@ private void printSubTree(HeapNode node, int depth) {
 	 */
 	public void delete(HeapNode node) 
 	{   
-		int Infinity = Integer.MAX_VALUE;
-		decreaseKey(node, Infinity);
+		int reductionBy = Infinity + node.key;
+		decreaseKey(node, reductionBy);
 		System.out.println("after deacrese key:");
 		printHeap();
 		deleteMin();

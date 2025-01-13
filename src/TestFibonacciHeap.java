@@ -46,7 +46,7 @@ public class TestFibonacciHeap {
         System.out.println("Heap size after delete: " + heap.size());
         System.out.println("Min node after delete: " + heap.findMin().key + " (" + heap.findMin().info + ")");
 
-        // Final heap statistics
+        //Final heap statistics
         System.out.println("\nFinal heap statistics:");
         System.out.println("Total number of cuts: " + heap.totalCuts());
         System.out.println("Total number of links: " + heap.totalLinks());
