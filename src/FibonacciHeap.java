@@ -117,23 +117,34 @@ private void printSubTree(HeapNode node, int depth) {
 		if (minNode != null){
 			// if ths minNode has child
 			if (minNode.child != null) {
-				System.out.println("searching min");
 				HeapNode newMin = searchMin(minNode.child); //search the min key among the minNode's childrens
-				System.out.println("newMin key is " + newMin.key);
 				minNode.child.parent = null; //detach connection between minNode and his child
+				minNode.child = null;
+				removeMin();
 				totalCutsCnt++;
 				FibonacciHeap newHeap = new FibonacciHeap(newMin); // create new heap from minNode's children
-				removeMin();
+				setNewHeap(newMin, newHeap);
 				meld(newHeap); // meld the original heap with minNode's childrens heap
 			}
 			else removeMin();
-			System.out.println("\nprinting heap from delete before conso");
-			printHeap();
 			consolidate();
 			total_nodes--;		
-			System.out.println("\nprinting heap from delete after conso");
-			printHeap();
 		}
+	}
+	
+	private void setNewHeap(HeapNode newMin,FibonacciHeap newHeap ) {
+		int rootsNum = 1;
+		int nodesNum = newMin.rank + 1;
+		HeapNode node = newMin.next;
+		do {
+			rootsNum++;
+	        nodesNum += (node.rank + 1);
+			node = node.next;
+		} while (node != newMin);
+		
+		newHeap.numOfRoots = rootsNum;
+		
+		newHeap.total_nodes = nodesNum;
 	}
 
 	private void removeMin()
@@ -161,8 +172,9 @@ private void printSubTree(HeapNode node, int depth) {
 	//search min key among the node and his brothers
 	public HeapNode searchMin(HeapNode node)
 	{
-		if (node == null ) return null;
-		if (node.next == null && node != minNode) return node;
+		if (node == null) return null;
+		if (node.next == node && node != minNode) return node;
+		if (node == minNode && node.next == minNode) return null;
 		HeapNode next = node.next;
     	int minVal = next.key; 
 		HeapNode newMin = node;
@@ -186,7 +198,6 @@ private void printSubTree(HeapNode node, int depth) {
 			HeapNode node = minNode.next;
 			for (int i=0 ; i<rootList.length ; i++){
 				rootList[i] = node;
-				System.out.println("rootList in index " + i + "is " + node.key);
 				node = node.next;
 				}
 		}
@@ -319,8 +330,6 @@ private void printSubTree(HeapNode node, int depth) {
 	{   
 		int reductionBy = Infinity + node.key;
 		decreaseKey(node, reductionBy);
-		System.out.println("after deacrese key:");
-		printHeap();
 		deleteMin();
 	}
 

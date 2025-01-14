@@ -22,8 +22,8 @@ public class TestFibonacciHeap {
 
         // Test deleteMin operation
         System.out.println("\nDeleting the minimum node:");
-        heap.printHeap();
         heap.deleteMin();
+//        heap.printHeap();
         System.out.println("Min node after deleteMin: " + heap.findMin().key + " (" + heap.findMin().info + ")");
         System.out.println("Heap size after deleteMin: " + heap.size());
 
@@ -31,22 +31,26 @@ public class TestFibonacciHeap {
         FibonacciHeap heap2 = new FibonacciHeap(null);
         heap2.insert(7, "Node 7");
         heap2.insert(15, "Node 15");
-        heap.printHeap();
-        heap2.printHeap();
+       
 
         System.out.println("\nMelding two heaps:");
         heap.meld(heap2);
-        heap.printHeap();
+//        heap.printHeap();
         System.out.println("Heap size after meld: " + heap.size());
         System.out.println("Min node after meld: " + heap.findMin().key + " (" + heap.findMin().info + ")");
 
         // Test delete operation
         System.out.println("\nDeleting Node 10:");
         heap.delete(node1);
+//        heap.printHeap();
+        System.out.println("Heap size after delete: " + heap.size());
+        System.out.println("Min node after delete: " + heap.findMin().key + " (" + heap.findMin().info + ")");
+        
+        System.out.println("\nDeleting Node 3:");
+        heap.deleteMin();
         heap.printHeap();
         System.out.println("Heap size after delete: " + heap.size());
         System.out.println("Min node after delete: " + heap.findMin().key + " (" + heap.findMin().info + ")");
-
         //Final heap statistics
         System.out.println("\nFinal heap statistics:");
         System.out.println("Total number of cuts: " + heap.totalCuts());
