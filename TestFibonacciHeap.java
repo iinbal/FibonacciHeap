@@ -22,6 +22,7 @@ public class TestFibonacciHeap {
 
         // Test deleteMin operation
         System.out.println("\nDeleting the minimum node:");
+        heap.printHeap();
         heap.deleteMin();
         System.out.println("Min node after deleteMin: " + heap.findMin().key + " (" + heap.findMin().info + ")");
         System.out.println("Heap size after deleteMin: " + heap.size());
