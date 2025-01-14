@@ -42,12 +42,14 @@ public class TestFibonacciHeap {
         // Test delete operation
         System.out.println("\nDeleting Node 10:");
         heap.delete(node1);
-//        heap.printHeap();
+        heap.printHeap();
         System.out.println("Heap size after delete: " + heap.size());
         System.out.println("Min node after delete: " + heap.findMin().key + " (" + heap.findMin().info + ")");
         
-        System.out.println("\nDeleting Node 3:");
-        heap.deleteMin();
+        System.out.println("\nDeleting Node 7:");
+        FibonacciHeap.HeapNode node = heap.findNodeWithKey(7);
+        System.out.println("node is " + node.key);
+        heap.delete(node);
         heap.printHeap();
         System.out.println("Heap size after delete: " + heap.size());
         System.out.println("Min node after delete: " + heap.findMin().key + " (" + heap.findMin().info + ")");

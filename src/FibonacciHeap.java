@@ -65,6 +65,40 @@ private void printSubTree(HeapNode node, int depth) {
 			numOfRoots++;	
 		}
 	}
+	
+	public HeapNode findNodeWithKey(int key) {
+	    if (minNode == null) {
+	        return null; // Return null if the heap is empty
+	    }
+
+	    // Start a recursive search from the root list
+	    return findNodeInSubtree(minNode, key);
+	}
+
+	private HeapNode findNodeInSubtree(HeapNode node, int key) {
+	    if (node == null) {
+	        return null;
+	    }
+
+	    HeapNode start = node; // Save the starting point to detect cycles
+	    do {
+	        if (node.key == key) {
+	            return node; // Return the node if the key matches
+	        }
+
+	        // Recursively search the children of the current node
+	        if (node.child != null) {
+	            HeapNode found = findNodeInSubtree(node.child, key);
+	            if (found != null) {
+	                return found; // Return the node if found in the subtree
+	            }
+	        }
+
+	        node = node.next; // Move to the next sibling
+	    } while (node != start); // Stop when we loop back to the starting node
+
+	    return null; // Return null if the key is not found
+	}
 
 	/**
 	 * 
