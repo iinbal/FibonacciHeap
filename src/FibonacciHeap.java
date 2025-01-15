@@ -149,12 +149,14 @@ private void printSubTree(HeapNode node, int depth) {
 	{
 		// if the heap is not empty
 		if (minNode != null){
+			System.out.println("minNode " + minNode.key);
+			printHeap();
 			// if the minNode has child
 			if (minNode.child != null) {
 				addChildrensToRoots(minNode);
 			}
 			else removeNode(minNode);
-			consolidate();
+			if (minNode != null) consolidate();
 			total_nodes--;		
 		}
 	}
@@ -187,11 +189,12 @@ private void printSubTree(HeapNode node, int depth) {
 
 	public void removeNode(HeapNode node)
 	{	
+		HeapNode newMin = minNode;
 		if (node == minNode) {
-		HeapNode newMin = searchNewMin(node); //search new min in the original heap
-		setMin(newMin);
+		newMin = searchNewMin(node); //search new min in the original heap
 		}
 		removeNodeFromRootList(node);
+		setMin(newMin);
 	}
 
 	//remove node by changing pointers
@@ -216,7 +219,7 @@ private void printSubTree(HeapNode node, int depth) {
 		if (node == minNode && node.next == minNode) return null; //if the min node is the only node, new Min in null
 		HeapNode next = node.next;
     	int minVal = next.key; 
-		HeapNode newMin = node;
+		HeapNode newMin = next;
 		// search the lowest key among all brothers
 		do {
 			if (next.key < minVal && next != minNode) {
@@ -231,6 +234,7 @@ private void printSubTree(HeapNode node, int depth) {
 
 	private void consolidate() {
 		// create a list of all roots
+		
 		HeapNode[] rootList = new HeapNode[numOfRoots]; 
 		rootList[0] = minNode; 
 		if (numOfRoots > 1) {
@@ -244,10 +248,7 @@ private void printSubTree(HeapNode node, int depth) {
 		int n = total_nodes;
 		int maxDegree = (int) Math.floor(Math.log(n) / Math.log(2.0)) + 1;
 		HeapNode[] degreeArray = new HeapNode[maxDegree];
-		//?????? degreeArray[minNode.rank] = minNode; // place minNode in the correct index according to it's degree
 		
-		//int i = 1; //starting from second root in the list
-		//HeapNode currentNode = rootList[i];
 		for (HeapNode currentNode : rootList){
 			int currDegree = currentNode.rank;
 			while (degreeArray[currDegree] != null){
@@ -269,7 +270,39 @@ private void printSubTree(HeapNode node, int depth) {
 			} 
 			degreeArray[currDegree] = currentNode; // place the new root in the right index after finished linking 	
 		}
+		
+//		buildHeap(degreeArray);
 	}
+	
+//	public void buildHeap(HeapNode[] roots) 
+//	{
+//		HeapNode min = roots[0];
+//		int minVal = 0;
+//		for (HeapNode root: roots) {
+//			if (root != null) {
+//				min = root;
+//				minVal = min.key;
+//			}
+//		}
+//		for (int i=0; i <roots.length ; i++) {
+//			if (roots[i] != null) {
+//				HeapNode next;
+//				HeapNode prev;
+//				if (i+1 < roots.length ) next = roots[i+1];
+//				else next = roots[0];
+//				if (i-1 >= 0 ) prev = roots[i-1];
+//				else prev = roots[roots.length -1];
+//				roots[i].next = next;
+//				roots[i].prev = prev;
+//				if (roots[i].key < minVal) {
+//					min = roots[i];
+//					minVal = min.key;
+//				}
+//			}
+//		}
+//		setMin(min);
+//		printHeap();
+//	}
 
 	public HeapNode link(HeapNode smaller, HeapNode larger){
 		// Remove the larger node from the root list
@@ -308,6 +341,7 @@ private void printSubTree(HeapNode node, int depth) {
 	 */
 	public void decreaseKey(HeapNode node, int diff) 
 	{   
+		if (node == null) return;
 		node.key = node.key - diff;
 		if (node.parent != null){
 			if (node.key < node.parent.key){
@@ -367,6 +401,7 @@ private void printSubTree(HeapNode node, int depth) {
 	 */
 	public void delete(HeapNode node) 
 	{   
+		if (node == null) return;
 		detachNode(node);
 		if (node.child != null){
 			addChildrensToRoots(node);
