@@ -220,8 +220,6 @@ public class FibonacciHeapTest2 {
 
         assert heap.numTrees() == 10 : "Initial number of trees should be 10";
         
-        System.out.println("before delete min");
-        heap.printHeap();
         heap.deleteMin();
         heap.deleteMin();
         heap.deleteMin();

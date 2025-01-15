@@ -149,8 +149,6 @@ private void printSubTree(HeapNode node, int depth) {
 	{
 		// if the heap is not empty
 		if (minNode != null){
-			System.out.println("minNode " + minNode.key);
-			printHeap();
 			// if the minNode has child
 			if (minNode.child != null) {
 				addChildrensToRoots(minNode);
