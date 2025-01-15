@@ -271,38 +271,8 @@ private void printSubTree(HeapNode node, int depth) {
 			degreeArray[currDegree] = currentNode; // place the new root in the right index after finished linking 	
 		}
 		
-//		buildHeap(degreeArray);
 	}
-	
-//	public void buildHeap(HeapNode[] roots) 
-//	{
-//		HeapNode min = roots[0];
-//		int minVal = 0;
-//		for (HeapNode root: roots) {
-//			if (root != null) {
-//				min = root;
-//				minVal = min.key;
-//			}
-//		}
-//		for (int i=0; i <roots.length ; i++) {
-//			if (roots[i] != null) {
-//				HeapNode next;
-//				HeapNode prev;
-//				if (i+1 < roots.length ) next = roots[i+1];
-//				else next = roots[0];
-//				if (i-1 >= 0 ) prev = roots[i-1];
-//				else prev = roots[roots.length -1];
-//				roots[i].next = next;
-//				roots[i].prev = prev;
-//				if (roots[i].key < minVal) {
-//					min = roots[i];
-//					minVal = min.key;
-//				}
-//			}
-//		}
-//		setMin(min);
-//		printHeap();
-//	}
+
 
 	public HeapNode link(HeapNode smaller, HeapNode larger){
 		// Remove the larger node from the root list
