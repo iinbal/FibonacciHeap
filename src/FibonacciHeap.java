@@ -149,24 +149,28 @@ private void printSubTree(HeapNode node, int depth) {
 	{
 		// if the heap is not empty
 		if (minNode != null){
-			// if ths minNode has child
+			// if the minNode has child
 			if (minNode.child != null) {
-				HeapNode newMin = searchMin(minNode.child); //search the min key among the minNode's childrens
-				minNode.child.parent = null; //detach connection between minNode and his child
-				minNode.child = null;
-				removeMin();
-				totalCutsCnt++;
-				FibonacciHeap newHeap = new FibonacciHeap(newMin); // create new heap from minNode's children
-				setNewHeap(newMin, newHeap);
-				meld(newHeap); // meld the original heap with minNode's childrens heap
+				addChildrensToRoots(minNode);
 			}
-			else removeMin();
+			else removeNode(minNode);
 			consolidate();
 			total_nodes--;		
 		}
 	}
+
+	public void addChildrensToRoots(HeapNode node){
+		HeapNode newMin = searchNewMin(node.child); //search the min key among the minNode's childrens
+		node.child.parent = null; //detach connection between minNode and his child
+		node.child = null;
+		removeNode(node);
+		totalCutsCnt++;
+		FibonacciHeap newHeap = new FibonacciHeap(newMin); // create new heap from minNode's children
+		setNewHeap(newMin, newHeap);
+		meld(newHeap); // meld the original heap with minNode's childrens heap
+	}
 	
-	private void setNewHeap(HeapNode newMin,FibonacciHeap newHeap ) {
+	public void setNewHeap(HeapNode newMin,FibonacciHeap newHeap) {
 		int rootsNum = 1;
 		int nodesNum = newMin.rank + 1;
 		HeapNode node = newMin.next;
@@ -181,12 +185,13 @@ private void printSubTree(HeapNode node, int depth) {
 		newHeap.total_nodes = nodesNum;
 	}
 
-	private void removeMin()
-	{
-		HeapNode nodeToDelete = minNode;
-		HeapNode newMin = searchMin(nodeToDelete); //search new min in the original heap
-		removeNodeFromRootList(nodeToDelete);
+	public void removeNode(HeapNode node)
+	{	
+		if (node == minNode) {
+		HeapNode newMin = searchNewMin(node); //search new min in the original heap
 		setMin(newMin);
+		}
+		removeNodeFromRootList(node);
 	}
 
 	//remove node by changing pointers
@@ -194,7 +199,7 @@ private void printSubTree(HeapNode node, int depth) {
 	{
         if (node == null) return;
 		if (node.next == node){
-			numOfRoots--;
+			clear();
 			return;
 		}
 		node.prev.next = node.next;
@@ -204,11 +209,11 @@ private void printSubTree(HeapNode node, int depth) {
     }
 
 	//search min key among the node and his brothers
-	public HeapNode searchMin(HeapNode node)
+	public HeapNode searchNewMin(HeapNode node)
 	{
 		if (node == null) return null;
-		if (node.next == node && node != minNode) return node;
-		if (node == minNode && node.next == minNode) return null;
+//		if (node.next == node && node != minNode) return node;
+		if (node == minNode && node.next == minNode) return null; //if the min node is the only node, new Min in null
 		HeapNode next = node.next;
     	int minVal = next.key; 
 		HeapNode newMin = node;
@@ -362,9 +367,12 @@ private void printSubTree(HeapNode node, int depth) {
 	 */
 	public void delete(HeapNode node) 
 	{   
-		int reductionBy = Infinity + node.key;
-		decreaseKey(node, reductionBy);
-		deleteMin();
+		detachNode(node);
+		if (node.child != null){
+			addChildrensToRoots(node);
+		}
+		else removeNode(node);
+		total_nodes--;		
 	}
 
 
@@ -433,10 +441,10 @@ private void printSubTree(HeapNode node, int depth) {
 	
 	private void clear() {
 		minNode = null;
-		// this.total_nodes = 0;
-		// this.numOfRoots = 0;
-		// this.totalCutsCnt = 0;
-		// this.totalLinksCnt = 0;
+		this.total_nodes = 0;
+		this.numOfRoots = 0;
+		this.totalCutsCnt = 0;
+		this.totalLinksCnt = 0;
 	}
 
 	/**
