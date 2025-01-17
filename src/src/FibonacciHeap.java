@@ -101,6 +101,8 @@ private void printSubTree(HeapNode node, int depth) {
 	 */
 
 	public void deleteMin() {
+		//System.out.println("\nbefore delete min, min is " + findMin().key);
+		//printHeap();
 		// if the heap is not empty
 		if (minNode != null){
 			// if the minNode has child, add childrens to root list
@@ -117,6 +119,8 @@ private void printSubTree(HeapNode node, int depth) {
 			}
 			consolidate();
 		}
+		//System.out.println("\nafter delete min, min is " + findMin().key);
+		//printHeap();
 	}
 
 	// removing a root with children and replacing it with its children
@@ -159,6 +163,7 @@ private void printSubTree(HeapNode node, int depth) {
 	 *
 	 */
 	public void delete(HeapNode node) {   
+		//printHeap();
 		if (node == null) return;
 		if (node == minNode) {
 			deleteMin();
@@ -169,6 +174,8 @@ private void printSubTree(HeapNode node, int depth) {
 		removeNodeFromCircularList(node);
 		total_nodes--;
 
+		//printHeap();
+		//System.out.println("min after delete " + findMin().key);
 	}
 
 
@@ -263,14 +270,16 @@ private void printSubTree(HeapNode node, int depth) {
 	}
 
 	private void findNewMin(HeapNode node){
+		//System.out.println("\nfindNewMin : curr node is " + node.key);
 		HeapNode currMin = node.next;
-		HeapNode curr = node;
+		HeapNode curr = node.next;
 		HeapNode end = node;
 		do { 
 			currMin = curr.key < currMin.key ? curr : currMin;
 			curr = curr.next;
 		} while (curr != end);
 		setMin(currMin);
+		//System.out.println("\nfindNewMin : new min is "+ findMin().key);
 	}
 	
 	// adding a new root
@@ -294,12 +303,16 @@ private void printSubTree(HeapNode node, int depth) {
 
 	
 	// removing a root with no children
-	public void  removeNodeFromCircularList(HeapNode node) {
+	public void removeNodeFromCircularList(HeapNode node) {
+		//System.out.println("\nbefore removeNodeFromCircularList");
+		//printHeap();
 		if (node == this.minNode) this.findNewMin(node);
 		node.prev.next = node.next;
 		node.next.prev = node.prev;
 		node.next = node;
 		node.prev = node;
+		//System.out.println("\nafter removeNodeFromCircularList");
+		//printHeap();
     }
 
 	// recursive detaching nodes
