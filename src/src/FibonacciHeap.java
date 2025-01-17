@@ -262,6 +262,16 @@ private void printSubTree(HeapNode node, int depth) {
 		minNode = node;
 	}
 
+	private void findNewMin(HeapNode node){
+		HeapNode currMin = node.next;
+		HeapNode curr = node;
+		HeapNode end = node;
+		do { 
+			currMin = curr.key < currMin.key ? curr : currMin;
+			curr = curr.next;
+		} while (curr != end);
+		setMin(currMin);
+	}
 	
 	// adding a new root
 	private void addNodeToList(HeapNode node, HeapNode other) {
@@ -285,6 +295,7 @@ private void printSubTree(HeapNode node, int depth) {
 	
 	// removing a root with no children
 	public void  removeNodeFromCircularList(HeapNode node) {
+		if (node == this.minNode) this.findNewMin(node);
 		node.prev.next = node.next;
 		node.next.prev = node.prev;
 		node.next = node;
@@ -314,37 +325,37 @@ private void printSubTree(HeapNode node, int depth) {
 	}
 
 	
+	
 	private void consolidate() {
-		// create a list of all roots
 		if (minNode == null) return;
-		int rootNum = numTrees();
-		HeapNode[] rootList = new HeapNode[rootNum];
-		HeapNode current = minNode;
-		for (int i = 0; i < rootNum; i++) {
-			rootList[i] = current;
-			current = current.next;
-		}
+		
 		//create an array of degrees according to the maxDegree, all set to null
-		int n = total_nodes;
-		int maxDegree = (int) (Math.floor(Math.log(n) / Math.log(2.0))) + 1;
+		int maxDegree = (int) (Math.log(total_nodes) / Math.log(2)) + 1;
 		HeapNode[] degreeArray = new HeapNode[maxDegree];
+		
+		// Traverse the circular root list and link trees with same degree
+		HeapNode start = minNode;
+		HeapNode current = minNode;
+		do {
+			HeapNode node = current;
+			current = current.next;
+			int degree = node.rank;
 
-		for (HeapNode node : rootList) {
-			if (node == null) continue;
-			int rank = node.rank;
-			while (degreeArray[rank] != null) {
-				HeapNode other = degreeArray[rank];
+			while (degreeArray[degree] != null) {
+				HeapNode other = degreeArray[degree];
 				if (other.key < node.key) {
 					HeapNode temp = node;
 					node = other;
 					other = temp;
 				}
-				link(other, node);
-				degreeArray[rank] = null;
-				rank++;
+				link(other, node); // Merge trees
+				degreeArray[degree] = null;
+				degree++;
 			}
-			degreeArray[rank] = node;
-		}
+			degreeArray[degree] = node;
+		} while (current != start);
+		
+		//reorder pointers between roots
 		afterConsolidation(degreeArray);
 	}
 
