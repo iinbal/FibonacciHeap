@@ -109,7 +109,7 @@ private void printSubTree(HeapNode node, int depth) {
 			if (minNode.child != null) addChildrenToRootList(minNode);
 			// delete min node and set a new one
 			HeapNode nodeToDelete = minNode;
-			setMin(nodeToDelete.next);
+			findNewMin(nodeToDelete);
 			removeNodeFromCircularList(nodeToDelete);
 			total_nodes--;
 			numOfRoots--;
