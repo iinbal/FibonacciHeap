@@ -75,12 +75,11 @@ public class FibonacciHeap
 	 *
 	 */
 	public HeapNode insert(int key, String info) {
-		HeapNode node = new HeapNode(key, info);
-		node.next = node;
-		node.prev = node;
+		HeapNode node = new HeapNode(key, info); // create node
 		if (minNode == null) setMin(node); // If tree is empty set the heap and the new node as the minNode
 		else addNodeToList(node, minNode); // Else, add the new node to the root list
 		if (key < minNode.key) setMin(node); // Update the minNode pointer if necessary
+		// update heap's fields
 		total_nodes++;
 		numOfRoots++;
 		return node;
@@ -108,19 +107,21 @@ public class FibonacciHeap
 			if (minNode.child != null) addChildrenToRootList(minNode);
 			// delete min node and set a new one
 			HeapNode nodeToDelete = minNode;
-			setMin(nodeToDelete.next);
-			removeNodeFromCircularList(nodeToDelete);
+			setMin(nodeToDelete.next); // set temporary minimum
+			removeNodeFromCircularList(nodeToDelete); // delete the cuurent minimum form heap
+			// update heap's fields
 			total_nodes--;
 			numOfRoots--;
+			// if the heap is empty set the min to be null
 			if (total_nodes == 0) {
 				minNode = null;
 				return;
 			}
-			consolidate();
+			consolidate(); //merge trees with same degree
 		}
 	}
 
-	// removing a root with children and replacing it with its children
+	// add the node's children to the heap's rootList 
 	public void addChildrenToRootList(HeapNode node){
 		HeapNode child = node.child;
 		child.parent = null;
@@ -134,6 +135,7 @@ public class FibonacciHeap
 		//detach connection between minNode and his children
 		node.child = null;
 		mergeCircularLists(minNode,child); //add the children to the root list
+		// update heap's fields
 		numOfRoots += node.rank;
 	}
 
@@ -146,11 +148,11 @@ public class FibonacciHeap
 	 */
 	public void decreaseKey(HeapNode node, int diff)
 	{
-		if (node == null) return;
+		if (node == null) return; //edge case
 		node.key = node.key - diff; // decrease key
 		if (node.parent != null){ // if the node is not a root
 			if (node.key < node.parent.key){ // if the heap rule is violated
-				detachNode(node);
+				detachNode(node); // recursively detach nodes to maintain heap rule
 			}
 		} else if (changeMin) {
 			// update min if necessary
@@ -166,16 +168,19 @@ public class FibonacciHeap
 	 *
 	 */
 	public void delete(HeapNode node) {
-		if (node == null) return;
-		if (node == minNode) {
+		if (node == null) return; //edge case
+		if (node == minNode) { // use the deleteMin
 			deleteMin();
 			return;
 		}
-		changeMin = false;
+		// perform decreaseKey without changing minNode
+		changeMin = false; 
 		decreaseKey(node, node.key - minNode.key + 1);
 		changeMin = true;
+		// add node's children to heap's rootList and remove the node itself
 		if (node.child != null) addChildrenToRootList(node);
 		removeNodeFromCircularList(node);
+		// update heap's fields
 		numOfRoots--;
 		total_nodes--;
 
@@ -221,16 +226,16 @@ public class FibonacciHeap
 			this.totalCutsCnt = heap2.totalCutsCnt;
 			this.totalLinksCnt = heap2.totalLinksCnt;
 
-			// both heaps aren't empty, connect the rootLists
+		// both heaps aren't empty, connect the rootLists and update the heap's fields
 		} else {
 			mergeCircularLists(minNode, heap2.minNode);
-			// update the relevant fields
 			if (heap2.minNode.key < this.minNode.key) setMin(heap2.minNode);
 			this.total_nodes += heap2.total_nodes;
 			this.numOfRoots += heap2.numOfRoots;
 			this.totalCutsCnt += heap2.totalCutsCnt;
 			this.totalLinksCnt += heap2.totalLinksCnt;
 		}
+		
 		// destroy heap2 so it won't be useable afterwards
 		heap2.clear();
 		return;
@@ -257,7 +262,7 @@ public class FibonacciHeap
 	}
 
 
-	// redefining the heap entirely
+	// destroy the heap by reset
 	private void clear() {
 		minNode = null;
 		this.total_nodes = 0;
@@ -267,13 +272,13 @@ public class FibonacciHeap
 	}
 
 
-	// updating the minimum
+	// update the minimum
 	private void setMin(HeapNode node){
 		minNode = node;
 	}
 
 
-	// adding a new root
+	// add new root
 	private void addNodeToList(HeapNode node, HeapNode other) {
 		node.prev = other;
 		node.next = other.next;
@@ -281,6 +286,7 @@ public class FibonacciHeap
 		other.next = node;
 	}
 
+	// connect two circular lists
 	private void mergeCircularLists(HeapNode a, HeapNode b) {
 		if (a == null || b == null) return;
 		HeapNode aNext = a.next;
@@ -293,7 +299,7 @@ public class FibonacciHeap
 
 
 
-	// removing a root with no children
+	// remove a root from circular list
 	public void  removeNodeFromCircularList(HeapNode node) {
 		node.prev.next = node.next;
 		node.next.prev = node.prev;
@@ -303,8 +309,8 @@ public class FibonacciHeap
 
 	// recursive detaching nodes
 	private void detachNode(HeapNode node){
-		removeNodeFromCircularList(node);
-		totalCutsCnt++;
+		removeNodeFromCircularList(node); // remove the node from rootList
+		totalCutsCnt++; //update field
 		// save the new child of node parent after cut node
 		HeapNode parent = node.parent;
 		if (parent != null) {
@@ -324,39 +330,40 @@ public class FibonacciHeap
 	}
 
 
+	
 	private void consolidate() {
-		// create a list of all roots
 		if (minNode == null) return;
-		int rootNum = numTrees();
-		HeapNode[] rootList = new HeapNode[rootNum];
-		HeapNode current = minNode;
-		for (int i = 0; i < rootNum; i++) {
-			rootList[i] = current;
-			current = current.next;
-		}
+		
 		//create an array of degrees according to the maxDegree, all set to null
-		int n = total_nodes;
-		int maxDegree = (int) (Math.floor(Math.log(n) / Math.log(2.0))) + 1;
+		int maxDegree = (int) (Math.log(total_nodes) / Math.log(2)) + 1;
 		HeapNode[] degreeArray = new HeapNode[maxDegree];
+		
+		// Traverse the circular root list and link trees with same degree
+		HeapNode start = minNode;
+		HeapNode current = minNode;
+		do {
+			HeapNode node = current;
+			current = current.next;
+			int degree = node.rank;
 
-		for (HeapNode node : rootList) {
-			if (node == null) continue;
-			int rank = node.rank;
-			while (degreeArray[rank] != null) {
-				HeapNode other = degreeArray[rank];
+			while (degreeArray[degree] != null) {
+				HeapNode other = degreeArray[degree];
 				if (other.key < node.key) {
 					HeapNode temp = node;
 					node = other;
 					other = temp;
 				}
-				link(other, node);
-				degreeArray[rank] = null;
-				rank++;
+				link(other, node); // Merge trees
+				degreeArray[degree] = null;
+				degree++;
 			}
-			degreeArray[rank] = node;
-		}
+			degreeArray[degree] = node;
+		} while (current != start);
+		
+		//reorder pointers between roots
 		afterConsolidation(degreeArray);
 	}
+
 
 	private void afterConsolidation(HeapNode[] roots) {
 		minNode = null;
