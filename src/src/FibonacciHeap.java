@@ -123,12 +123,18 @@ public class FibonacciHeap
 	// removing a root with children and replacing it with its children
 	public void addChildrenToRootList(HeapNode node){
 		HeapNode child = node.child;
-		node.child.parent = null;
-		//detach connection between minNode and his child
+		child.parent = null;
+		HeapNode next = child.next;
+		totalCutsCnt++;
+		do {
+			next.parent = null;
+			totalCutsCnt++;
+			next = next.next;
+		} while (next != child);
+		//detach connection between minNode and his children
 		node.child = null;
 		mergeCircularLists(minNode,child); //add the children to the root list
 		numOfRoots += node.rank;
-		totalCutsCnt++;
 	}
 
 	/**
