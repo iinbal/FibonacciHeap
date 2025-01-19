@@ -104,7 +104,16 @@ public class FibonacciHeap
 		// if the heap is not empty
 		if (minNode != null){
 			// if the minNode has child, add childrens to root list
-			if (minNode.child != null) addChildrenToRootList(minNode);
+			if (minNode.child != null) {
+				HeapNode child = minNode.child;
+				do {
+					child.parent = null;
+					totalCutsCnt++;
+					child = child.next;
+				} while (child != minNode.child);
+				mergeCircularLists(minNode , child);
+			}
+			numOfRoots += minNode.rank;
 			// delete min node and set a new one
 			HeapNode nodeToDelete = minNode;
 			setMin(nodeToDelete.next); // set temporary minimum
@@ -119,24 +128,6 @@ public class FibonacciHeap
 			}
 			consolidate(); //merge trees with same degree
 		}
-	}
-
-	// add the node's children to the heap's rootList 
-	public void addChildrenToRootList(HeapNode node){
-		HeapNode child = node.child;
-		child.parent = null;
-		HeapNode next = child.next;
-		totalCutsCnt++;
-		do {
-			next.parent = null;
-			totalCutsCnt++;
-			next = next.next;
-		} while (next != child);
-		//detach connection between minNode and his children
-		node.child = null;
-		mergeCircularLists(minNode,child); //add the children to the root list
-		// update heap's fields
-		numOfRoots += node.rank;
 	}
 
 	/**
@@ -178,7 +169,15 @@ public class FibonacciHeap
 		decreaseKey(node, node.key - minNode.key + 1);
 		changeMin = true;
 		// add node's children to heap's rootList and remove the node itself
-		if (node.child != null) addChildrenToRootList(node);
+		if (node.child != null) {
+				HeapNode child = node.child;
+				do {
+					child.parent = null;
+					child = child.next;
+				} while (child != node.child);
+				mergeCircularLists(minNode, node.child);
+		}
+		numOfRoots += node.rank;
 		removeNodeFromCircularList(node);
 		// update heap's fields
 		numOfRoots--;
