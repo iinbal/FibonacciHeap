@@ -443,6 +443,8 @@ public int potential() {
 			y.prev = y;
 		} else {
 			addNodeToList(y, xChild);
+			// Make sure child points to the largest key among children
+			if (y.key > xChild.key) x.child = y;
 		}
 		x.rank++;
 		numOfRoots--;
